@@ -19,4 +19,3 @@
     command: docker run -itd -p 8081:8081 --name my-banking geetha0914/banking-application:1.0
 	
 	
-	

@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('git checkout') {
+            steps {
+                git 'https://github.com/geetha0914/Banking-project-demo.git'
+                
+            }
+        }
+        stage('build the code') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('build the docker image') {
+            steps {
+                sh 'docker build -t geetha0914/banking-application:1.0 .'
+                 
+            }
+        }
+        stage('push the image into Dockerhub') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-hub-key', variable: 'dockerhub')]) {
+                    sh "docker login -u geetha0914 -p ${dockerhub}"
+                    sh 'docker push geetha0914/banking-application:1.0'
+    
+                }
+                
+            }
+            
+        }  
+         stage('deploy the test server') {
+            steps {
+                ansiblePlaybook become: true, credentialsId: 'ssh-ansible-key', disableHostKeyChecking: true, installation: 'Ansible', inventory: '/etc/ansible/hosts/', playbook: 'configure-test-server.yml'
+                
+                 
+            }
+        }
+        stage('deploy the jenkins code into  prod server') {
+            steps {
+                ansiblePlaybook become: true, credentialsId: 'ssh-ansible-key1', disableHostKeyChecking: true, installation: 'Ansible', inventory: '/etc/ansible/hosts/', playbook: 'configure-prod-server.yml'
+                
+            }
+        }
+    }
+}

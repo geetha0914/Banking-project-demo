@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('git checkout') {
+            steps {
+                git 'https://github.com/geetha0914/Banking-project-demo.git'
+                
+            }
+        }
+        stage('deploy the jenkins code into  prod server') {
+            steps {
+                ansiblePlaybook become: true, credentialsId: 'ssh-ansible1-key', disableHostKeyChecking: true, installation: 'Ansible', inventory: '/etc/ansible/hosts/', playbook: 'configure-prod-server.yml'
+                
+            }
+        }
+    }
+}
